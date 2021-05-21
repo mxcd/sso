@@ -1,25 +1,44 @@
 scalar DateTime
 
-type Member @key(fields: "id") {
+type User @key(fields: "id") {
     id: Int!
-    firstName: String!
-    lastName: String!
-    username: String!
     email: String!
-    groups: [Group!]!
+    validated: Boolean!
+    locked: Boolean!
+    groups: [UserGroup!]!
     createdBy: String!
     createdDate: DateTime!
     modifiedBy: String!
     modifiedDate: DateTime!
 }
 
-type Group @key(fields: "id") {
+type UserGroup @key(fields: "id") {
     id: Int!
     name: String!
     displayName: String!
-    members: [Member!]!
+    description: String!
+    users: [User!]!
     createdBy: String!
     createdDate: DateTime!
     modifiedBy: String!
     modifiedDate: DateTime!
+}
+
+type SignUpPayload {
+    user: User!
+    accessToken: String!
+}
+
+type SignInPayload {
+    accessToken: String!
+}
+
+type UserGroupsPayload {
+    userGroups: [UserGroup!]!
+    total: Int!
+}
+
+type UsersPayload {
+    users: [User!]!
+    total: Int!
 }

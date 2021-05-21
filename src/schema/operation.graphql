@@ -1,11 +1,19 @@
 type Query {
-    members(search: String, limit: Int = 100, after: Int = 0): [Member!]
-    member(id: Int!): Member
-    groups(search: String, limit: Int = 100, after: Int = 0): [Group!]
-    group(id: Int!): Group
+    me: User!
+    users(search: String, limit: Int = 100, after: Int = 0): UsersPayload
+    user(id: Int!): User!
+    userGroups(search: String, limit: Int = 100, after: Int = 0): UserGroupsPayload
+    userGroup(id: Int!): UserGroup!
 }
 
 type Mutation {
-    addMember(input: CreateMemberInput): Member
-    addGroup(input: AddGroupInput): Group
+    signUp(input: SignUpUserInput): SignUpPayload!
+    signIn(input: SignInInput): SignInPayload!
+    signOut: Boolean!
+    createUser(input: CreateUserInput): User!
+    editUser(input: EditUserInput): User!
+    deleteUser(input: DeleteUserInput): Boolean!
+    createUserGroup(input: CreateUserGroupInput): UserGroup!
+    editUserGroup(input: EditUserGroupInput): UserGroup!
+    deleteUserGroup(input: DeleteUserGroupInput): Boolean!
 }

@@ -1,12 +1,43 @@
-input CreateMemberInput {
-    firstName: String!
-    lastName: String!
-    username: String!
-    email: String!
-    groups: [String!]
+input DeleteUserGroupInput {
+    id: Int!
 }
 
-input AddGroupInput {
+input EditUserGroupInput {
+    id: Int!
+    name: String
+    displayName: String
+    description: String
+}
+
+input CreateUserGroupInput {
     name: String!
     displayName: String!
+    description: String!
+}
+
+input DeleteUserInput {
+    id: Int!
+}
+
+input CreateUserInput {
+    email: String!
+    password: String!
+}
+
+input EditUserInput {
+    id: Int!
+    email: String
+    groups: [String!]
+    validated: Boolean
+    locked: Boolean
+}
+
+input SignInInput {
+    email: String!
+    password: String!
+}
+
+input SignUpUserInput {
+    email: String!
+    password: String!
 }

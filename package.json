@@ -57,6 +57,9 @@
     "graphql": "^15.5.0",
     "graphql-import-node": "0.0.4",
     "graphql-tools": "^7.0.4",
+    "helmet": "^4.6.0",
+    "https-localhost": "^4.6.4",
+    "oidc-provider": "^7.2.0",
     "winston": "^3.3.3"
   }
 }
