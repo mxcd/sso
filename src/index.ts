@@ -1,17 +1,20 @@
+const path = require('path');
 const { ApolloServer } =  require('apollo-server-express');
-import { createServer } from 'http';
-import compression from 'compression';
 // import cors from 'cors';
-const helmet = require('helmet');
+// const helmet = require('helmet');
+import compression from 'compression';
 const { Provider } =  require('oidc-provider');
 const providerConfig = require('../provider-config')
+
+const fs = require('fs');
+const http = require('http');
+const https = require('https');
+
+const routes = require('./routes');
 
 import {prisma, log, env, contextBuilder} from "./util";
 
 let express = require("express");
-if(!env.production) {
-    require("https-localhost");
-}
 
 const {API_PORT = 3000, ISSUER_URL = "https://localhost:3000"} = env
 
@@ -20,9 +23,10 @@ import schema from './schema/schemas';
 async function main() {
     log.info(`Generating express server`)
     const app = express();
-    app.use(helmet());
-    app.set('view engine', 'pug')
-    app.set('views', './views')
+    // app.use(helmet());
+    // app.set('view engine', 'pug')
+    app.set('views', path.join(__dirname, 'views'));
+    app.set('view engine', 'ejs');
 
     const oidc = new Provider(ISSUER_URL, {
         ...providerConfig,
@@ -34,7 +38,6 @@ async function main() {
         }
     });
 
-    app.use(oidc.callback());
 
     log.info(`Generating Apollo server`)
     const index = new ApolloServer({
@@ -47,11 +50,22 @@ async function main() {
     app.use(compression());
     index.applyMiddleware({ app, path: '/graphql' });
 
-    log.info(`Creating server`)
-    const httpServer = createServer(app);
+    routes(app, oidc);
+    app.use(oidc.callback());
 
-    log.info(`Starting server`)
-    httpServer.listen({ port: API_PORT }, (): void => console.log(`GraphQL is now running on port ${API_PORT}`));
+    if(!env.production) {
+        const privateKey  = fs.readFileSync('localhost+1-key.pem', 'utf8');
+        const certificate = fs.readFileSync('localhost+1.pem', 'utf8');
+        const credentials = {key: privateKey, cert: certificate};
+        const server = https.createServer(credentials, app);
+        log.info(`Starting server`)
+        server.listen({ port: API_PORT }, (): void => console.log(`Server is now running on port ${API_PORT}`));
+    }
+    else {
+        const server = http.createServer(app);
+        log.info(`Starting server`)
+        server.listen({ port: API_PORT }, (): void => console.log(`Server is now running on port ${API_PORT}`));
+    }
 }
 
 main()
