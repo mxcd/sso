@@ -1,4 +1,6 @@
 /* eslint-disable no-console, max-len, camelcase, no-unused-vars */
+import {createUser} from "./controller/UserController";
+
 const { strict: assert } = require('assert');
 const querystring = require('querystring');
 const { inspect } = require('util');
@@ -161,6 +163,52 @@ module.exports = (app, provider) => {
                 error: 'access_denied',
                 error_description: 'End-User aborted interaction',
             };
+            await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
+        } catch (err) {
+            next(err);
+        }
+    });
+
+    app.get('/interaction/:uid/register', setNoCache, async (req, res, next) => {
+        const {
+            uid, prompt, params, session,
+        } = await provider.interactionDetails(req, res);
+
+        const client = await provider.Client.find(params.client_id);
+
+        return res.render('register', {
+            client,
+            uid,
+            details: prompt.details,
+            params,
+            title: 'Sign-up',
+            session: session ? debug(session) : undefined,
+            dbg: {
+                params: debug(params),
+                prompt: debug(prompt),
+            },
+        });
+    })
+
+    app.post('/interaction/:uid/register', setNoCache, body, async (req, res, next) => {
+        try {
+            const { prompt: { name } } = await provider.interactionDetails(req, res);
+            console.log(name)
+            console.log(`Trying to register ${req.body.email}`)
+            const {user, error, message} = await createUser(req.body.email, req.body.password);
+            if(error || user === null) {
+                next(message);
+                return;
+            }
+
+            const account = {accountId: user.id}
+
+            const result = {
+                login: {
+                    accountId: account.accountId,
+                },
+            };
+
             await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
         } catch (err) {
             next(err);

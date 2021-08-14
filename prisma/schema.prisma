@@ -8,7 +8,7 @@ datasource db {
 }
 
 model UserGroup {
-  id           Int      @default(autoincrement()) @id
+  id           Int   @default(autoincrement()) @id
   name         String   @unique
   displayName  String
   description  String
@@ -20,8 +20,9 @@ model UserGroup {
 }
 
 model User {
-  id           Int     @default(autoincrement()) @id
-  email        String  @unique
+  id           String   @default(uuid()) @id
+  email        String   @unique
+  passwordHash String
   validated    Boolean
   locked       Boolean
   createdBy    String

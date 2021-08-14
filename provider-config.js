@@ -1,9 +1,14 @@
+/*
+* Example configuration
+* !! CHANGE KEYS AND SECRETS IN PRODUCTION !!
+*/
+
 const config =  {
     clients: [
         {
             client_id: "oidc_test_id",
             client_secret: "oidc_test_secret",
-            redirect_uris: ["https://localhost:8000/secure/redirect_uri"]
+            redirect_uris: ["https://localhost:8080/secure/redirect_uri"]
         }
     ],
     cookies: {
