@@ -31,8 +31,10 @@ export async function createUser(email: string, password: string) {
 export async function checkUserLogin(email, password) {
     const user = await prisma.user.findUnique({where: {email}});
     if(user === null) {
-        return false;
+        return {valid: false, user: null};
     }
-    const match = await bcrypt.compare(password, user.passwordHash);
-    return match;
+    else {
+        const match = await bcrypt.compare(password, user.passwordHash);
+        return {valid: match, user};
+    }
 }

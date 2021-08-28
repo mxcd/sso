@@ -1,6 +1,18 @@
 <form autocomplete="off" action="/interaction/<%= uid %>/login" method="post">
-    <input required type="text" name="login" placeholder="Enter any login" <% if (!params.login_hint) { %>autofocus="on"<% } else { %> value="<%= params.login_hint %>" <% } %>>
-    <input required type="password" name="password" placeholder="and password" <% if (params.login_hint) { %>autofocus="on"<% } %>>
+    <% if(params.message === 'invalid_login') { %>
+    <div class="error-message">
+        Username or password invalid
+    </div>
+    <%= params.extra %>
+    <% } %>
+    <input required type="text" name="login" placeholder="Email"
+           <% if(!params.email) { %>autofocus="on"<% } %>
+           value="<%= params.email ? params.email : '' %>"
+    />
+
+    <input required type="password" name="password" placeholder="Password"
+           <% if(params.email) { %>autofocus="on"<% } %>
+    />
     <a href="/interaction/<%= uid %>/register">Create an account</a>
     <button type="submit" class="login login-submit">Sign-in</button>
 </form>

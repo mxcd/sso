@@ -1,31 +1,23 @@
 /* eslint-disable no-console, max-len, camelcase, no-unused-vars */
-import {createUser} from "./controller/UserController";
+import {checkUserLogin, createUser} from "./controller/UserController";
+import {LOGIN_MESSAGE, renderLogin} from "./view-controller/login-controller";
+import {REGISTER_MESSAGE, renderRegister} from "./view-controller/register-controller";
+import {renderConsent} from "./view-controller/consent-controller";
 
 const { strict: assert } = require('assert');
-const querystring = require('querystring');
-const { inspect } = require('util');
+// const querystring = require('querystring');
+// const { inspect } = require('util');
 
-const isEmpty = require('lodash/isEmpty');
 const { urlencoded } = require('express'); // eslint-disable-line import/no-unresolved
-
 const body = urlencoded({ extended: false });
 
-const keys = new Set();
-const debug = (obj) => querystring.stringify(Object.entries(obj).reduce((acc, [key, value]) => {
-    keys.add(key);
-    if (isEmpty(value)) return acc;
-    acc[key] = inspect(value, { depth: null });
-    return acc;
-}, {}), '<br/>', ': ', {
-    encodeURIComponent(value) { return keys.has(value) ? `<strong>${value}</strong>` : value; },
-});
 
 module.exports = (app, provider) => {
     const { constructor: { errors: { SessionNotFound } } } = provider;
 
+    // Use middleware to render layout
     app.use((req, res, next) => {
         const orig = res.render;
-        // you'll probably want to use a full blown render engine capable of layouts
         res.render = (view, locals) => {
             app.render(view, locals, (err, html) => {
                 if (err) throw err;
@@ -46,41 +38,13 @@ module.exports = (app, provider) => {
 
     app.get('/interaction/:uid', setNoCache, async (req, res, next) => {
         try {
-            const {
-                uid, prompt, params, session,
-            } = await provider.interactionDetails(req, res);
-
-            const client = await provider.Client.find(params.client_id);
-
-            switch (prompt.name) {
-                case 'login': {
-                    return res.render('login', {
-                        client,
-                        uid,
-                        details: prompt.details,
-                        params,
-                        title: 'Sign-in',
-                        session: session ? debug(session) : undefined,
-                        dbg: {
-                            params: debug(params),
-                            prompt: debug(prompt),
-                        },
-                    });
-                }
-                case 'consent': {
-                    return res.render('interaction', {
-                        client,
-                        uid,
-                        details: prompt.details,
-                        params,
-                        title: 'Authorize',
-                        session: session ? debug(session) : undefined,
-                        dbg: {
-                            params: debug(params),
-                            prompt: debug(prompt),
-                        },
-                    });
-                }
+            let {prompt: {name}} = await provider.interactionDetails(req, res);
+            switch (name) {
+                case 'login':
+                    // render login page due to GET /login request
+                    return await renderLogin(req, res, provider, LOGIN_MESSAGE.NO_MESSAGE);
+                case 'consent':
+                    return await renderConsent(req, res, provider);
                 default:
                     return undefined;
             }
@@ -89,19 +53,25 @@ module.exports = (app, provider) => {
         }
     });
 
+    // handle login
     app.post('/interaction/:uid/login', setNoCache, body, async (req, res, next) => {
         try {
             const { prompt: { name } } = await provider.interactionDetails(req, res);
             assert.equal(name, 'login');
-            const account = {accountId: 'abc1234'}
-
-            const result = {
-                login: {
-                    accountId: account.accountId,
-                },
-            };
-
-            await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
+            const email = req.body.login;
+            const password = req.body.password;
+            const userResult = await checkUserLogin(email, password);
+            if(userResult.valid && userResult.user !== null) {
+                const result = {
+                    login: {
+                        accountId: userResult.user.id,
+                    },
+                };
+                return await provider.interactionFinished(req, res, result, { mergeWithLastSubmission: false });
+            }
+            else {
+                return renderLogin(req, res, provider, LOGIN_MESSAGE.INVALID_LOGIN)
+            }
         } catch (err) {
             next(err);
         }
@@ -170,24 +140,7 @@ module.exports = (app, provider) => {
     });
 
     app.get('/interaction/:uid/register', setNoCache, async (req, res, next) => {
-        const {
-            uid, prompt, params, session,
-        } = await provider.interactionDetails(req, res);
-
-        const client = await provider.Client.find(params.client_id);
-
-        return res.render('register', {
-            client,
-            uid,
-            details: prompt.details,
-            params,
-            title: 'Sign-up',
-            session: session ? debug(session) : undefined,
-            dbg: {
-                params: debug(params),
-                prompt: debug(prompt),
-            },
-        });
+        return await renderRegister(req, res, provider, REGISTER_MESSAGE.NO_MESSAGE)
     })
 
     app.post('/interaction/:uid/register', setNoCache, body, async (req, res, next) => {

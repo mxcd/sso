@@ -1,0 +1,45 @@
+LoadModule ssl_module modules/mod_ssl.so
+Listen 443
+
+<VirtualHost *:443>
+    ServerAdmin webmaster@example.com
+    ServerName localhost
+    DocumentRoot /usr/local/apache2/htdocs
+    DirectoryIndex index.html
+
+    OIDCProviderMetadataURL https://host.docker.internal/.well-known/openid-configuration
+    OIDCClientID oidc_test_id
+    OIDCClientSecret oidc_test_secret
+    OIDCRedirectURI https://localhost:8000/secure/redirect_uri
+
+    OIDCCryptoPassphrase pimtOafJoowojatNavkebyasyemGofwu
+    OIDCJWKSRefreshInterval 3600
+
+    OIDCRefreshAccessTokenBeforeExpiry 600
+    OIDCUserInfoRefreshInterval 1260
+    OIDCSessionInactivityTimeout 43200
+    OIDCSessionMaxDuration 43200
+
+    #OIDCInfoHook iat access_token access_token_expires refresh_token
+
+    OIDCScope "openid offline_access"
+    OIDCCookieHTTPOnly Off
+    OIDCCookie auth_oidc_session
+
+    OIDCPKCEMethod S256
+
+    OIDCSSLValidateServer Off
+
+    Header set Access-Control-Allow-Origin "*"
+
+    SSLEngine on
+    SSLProxyEngine on
+    SSLCertificateFile /ssl/cert.pem
+    SSLCertificateKeyFile /ssl/key.pem
+
+    <Location /secure>
+      AuthType openid-connect
+      Require valid-user
+      FallbackResource /secure/index.html
+    </Location>
+</VirtualHost>

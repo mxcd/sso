@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  relying_party:
+    build: {{DOCKERFILE_PATH}}
+    ports:
+      - "8000:443"
+    volumes:
+      - "{{HTDOCS_PATH}}:/usr/local/apache2/htdocs"
+      - "{{OIDC_CONF_PATH}}:/usr/local/apache2/conf/oidc.conf"
+      - "{{SSL_KEY_PATH}}:/ssl/key.pem"
+      - "{{SSL_CERT_PATH}}:/ssl/cert.pem"

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>Sign-in</title>
+    <title>SSO Login</title>
     <style>
         @import url(https://fonts.googleapis.com/css?family=Roboto:400,100);
 
@@ -28,6 +28,17 @@
 
         .login-card + .login-card {
             padding-top: 10px;
+        }
+
+        .error-message {
+            font-size: 15px;
+            padding: 10px 0;
+            text-align: center;
+            width: 100%;
+            margin-bottom: 10px;
+            background: #ffffff;
+            border: 2px solid #ff0000;
+            box-sizing: border-box;
         }
 
         .login-card h1 {
@@ -187,43 +198,6 @@
 <div class="login-card">
     <h1><%= title %></h1>
     <%- body %>
-    <div class="login-help">
-        <a href="/interaction/<%= uid %>/abort">[ Cancel ]</a>
-        <% if (client.tosUri) { %>
-            <a href="<%= client.tosUri %>">[ Terms of Service ]</a>
-        <% } %>
-        <% if (client.policyUri) { %>
-            <a href="<%= client.policyUri %>">[ Privacy Policy ]</a>
-        <% } %>
-    </div>
-</div>
-<div class="grant-debug">
-    <details>
-        <summary style="text-align: center;">(Click to expand) DEBUG information</summary>
-        <div>
-            <strong>uid</strong>: <%= uid %>
-        </div>
-
-        <% if (session) { %>
-            <div>
-                SESSION <br>
-                ========= <br>
-                <%- session %>
-            </div>
-        <% } %>
-
-        <div>
-            PARAMS <br>
-            ======== <br>
-            <%- dbg.params %>
-        </div>
-
-        <div>
-            PROMPT <br>
-            ======== <br>
-            <%- dbg.prompt %>
-        </div>
-    </details>
 </div>
 </body>
 </html>
