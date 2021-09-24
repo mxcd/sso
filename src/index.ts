@@ -31,14 +31,14 @@ async function main() {
     const oidc = new Provider(ISSUER_URL, {
         ...providerConfig,
         async findAccount(ctx, id) {
-            console.log(`getting account id '${id}'`)
-            console.dir(ctx)
+            // console.log(`getting account id '${id}'`)
+            // console.dir(ctx)
             return {
                 accountId: id,
                 async claims(use, scope) {
-                    console.log(`getting claims`)
-                    console.dir(use)
-                    console.dir(scope)
+                    // console.log(`getting claims`)
+                    // console.dir(use)
+                    // console.dir(scope)
                     return { sub: id };
                 },
             };

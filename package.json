@@ -59,6 +59,7 @@
     "graphql-tools": "^7.0.5",
     "helmet": "^4.6.0",
     "https-localhost": "^4.6.5",
+    "nodemailer": "^6.6.3",
     "oidc-provider": "^7.3.2",
     "prisma": "^2.23.0",
     "winston": "^3.3.3"

@@ -20,14 +20,16 @@ model UserGroup {
 }
 
 model User {
-  id           String   @default(uuid()) @id
-  email        String   @unique
-  passwordHash String
-  validated    Boolean
-  locked       Boolean
-  createdBy    String
-  createdDate  DateTime @default(now())
-  modifiedBy   String
-  modifiedDate DateTime @default(now())
-  groups       UserGroup[]
+  id             String   @default(uuid()) @id
+  email          String   @unique
+  passwordHash   String
+  validated      Boolean  @default(false)
+  locked         Boolean  @default(true)
+  validationCode String   @default(uuid())
+  resetCode      String?
+  createdBy      String
+  createdDate    DateTime @default(now())
+  modifiedBy     String
+  modifiedDate   DateTime @default(now())
+  groups         UserGroup[]
 }

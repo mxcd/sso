@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  relying_party:
+    build: C:/Users/mpartenfelder/github/sso/scripts/relying-party
+    ports:
+      - "8000:443"
+    volumes:
+      - "C:/Users/mpartenfelder/github/sso/scripts/relying-party/htdocs:/usr/local/apache2/htdocs"
+      - "C:/Users/mpartenfelder/github/sso/scripts/relying-party/oidc.conf:/usr/local/apache2/conf/oidc.conf"
+      - "C:/Users/mpartenfelder/github/sso/localhost+1-key.pem:/ssl/key.pem"
+      - "C:/Users/mpartenfelder/github/sso/localhost+1.pem:/ssl/cert.pem"

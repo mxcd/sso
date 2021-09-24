@@ -4,11 +4,19 @@
 */
 
 const config =  {
+    scopes: [
+        'openid',
+        'offline_access'
+    ],
     clients: [
         {
             client_id: "oidc_test_id",
             client_secret: "oidc_test_secret",
-            redirect_uris: ["https://localhost:8000/secure/redirect_uri"]
+            redirect_uris: ["https://localhost:8000/secure/redirect_uri"],
+            grant_types: [
+                "authorization_code",
+                "refresh_token"
+            ]
         }
     ],
     cookies: {
@@ -42,5 +50,41 @@ const config =  {
             },
         ],
     },
+    loadExistingGrant: async (ctx) => {
+        // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_consent.md
+        const grantId = (ctx.oidc.result
+            && ctx.oidc.result.consent
+            && ctx.oidc.result.consent.grantId) || ctx.oidc.session.grantIdFor(ctx.oidc.client.clientId);
+
+        if (grantId) {
+            return ctx.oidc.provider.Grant.find(grantId);
+        } else {
+            const grant = new ctx.oidc.provider.Grant({
+                clientId: ctx.oidc.client.clientId,
+                accountId: ctx.oidc.session.accountId,
+            });
+
+            grant.addOIDCScope('openid email profile offline_access');
+            grant.addOIDCClaims(['first_name refresh_token']);
+            grant.addResourceScope('urn:example:resource-indicator', 'api:read api:write');
+            await grant.save();
+            return grant;
+        }
+    },
+    issueRefreshToken: async (ctx, client, code) => {
+        if (!client.grantTypeAllowed('refresh_token')) {
+            return false;
+        }
+        return code.scopes.has('offline_access') || (client.applicationType === 'web' && client.tokenEndpointAuthMethod === 'none');
+    },
+    ttl: {
+        AuthorizationCode: 30 /* 30 seconds */,
+        Session: 1209600 /* 14 days in seconds */,
+        DeviceCode: 600 /* 10 minutes in seconds */,
+        Grant: 1209600 /* 14 days in seconds */,
+        IdToken: 10 /* 1 hour in seconds */,
+        Interaction: 3600 /* 1 hour in seconds */,
+        AccessToken: 10  /* 30 minutes in seconds */,
+    }
 }
 module.exports = config;

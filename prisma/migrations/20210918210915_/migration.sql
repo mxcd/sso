@@ -19,6 +19,8 @@ CREATE TABLE "User" (
     "passwordHash" TEXT NOT NULL,
     "validated" BOOLEAN NOT NULL,
     "locked" BOOLEAN NOT NULL,
+    "validationCode" TEXT NOT NULL,
+    "resetCode" TEXT NOT NULL,
     "createdBy" TEXT NOT NULL,
     "createdDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "modifiedBy" TEXT NOT NULL,

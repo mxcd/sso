@@ -12,7 +12,23 @@ export type Scalars = {
   DateTime: any;
 };
 
+export type CreateUserGroupInput = {
+  name: Scalars['String'];
+  displayName: Scalars['String'];
+  description: Scalars['String'];
+};
+
+export type CreateUserInput = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+};
+
+
 export type DeleteUserGroupInput = {
+  id: Scalars['Int'];
+};
+
+export type DeleteUserInput = {
   id: Scalars['Int'];
 };
 
@@ -23,70 +39,12 @@ export type EditUserGroupInput = {
   description?: Maybe<Scalars['String']>;
 };
 
-export type CreateUserGroupInput = {
-  name: Scalars['String'];
-  displayName: Scalars['String'];
-  description: Scalars['String'];
-};
-
-export type DeleteUserInput = {
-  id: Scalars['Int'];
-};
-
-export type CreateUserInput = {
-  email: Scalars['String'];
-  password: Scalars['String'];
-};
-
 export type EditUserInput = {
   id: Scalars['Int'];
   email?: Maybe<Scalars['String']>;
   groups?: Maybe<Array<Scalars['String']>>;
   validated?: Maybe<Scalars['Boolean']>;
   locked?: Maybe<Scalars['Boolean']>;
-};
-
-export type SignInInput = {
-  email: Scalars['String'];
-  password: Scalars['String'];
-};
-
-export type SignUpUserInput = {
-  email: Scalars['String'];
-  password: Scalars['String'];
-};
-
-export type Query = {
-  __typename?: 'Query';
-  me: User;
-  users?: Maybe<UsersPayload>;
-  user: User;
-  userGroups?: Maybe<UserGroupsPayload>;
-  userGroup: UserGroup;
-};
-
-
-export type QueryUsersArgs = {
-  search?: Maybe<Scalars['String']>;
-  limit?: Maybe<Scalars['Int']>;
-  after?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryUserArgs = {
-  id: Scalars['Int'];
-};
-
-
-export type QueryUserGroupsArgs = {
-  search?: Maybe<Scalars['String']>;
-  limit?: Maybe<Scalars['Int']>;
-  after?: Maybe<Scalars['Int']>;
-};
-
-
-export type QueryUserGroupArgs = {
-  id: Scalars['Int'];
 };
 
 export type Mutation = {
@@ -142,6 +100,59 @@ export type MutationDeleteUserGroupArgs = {
   input?: Maybe<DeleteUserGroupInput>;
 };
 
+export type Query = {
+  __typename?: 'Query';
+  me: User;
+  users?: Maybe<UsersPayload>;
+  user: User;
+  userGroups?: Maybe<UserGroupsPayload>;
+  userGroup: UserGroup;
+};
+
+
+export type QueryUsersArgs = {
+  search?: Maybe<Scalars['String']>;
+  limit?: Maybe<Scalars['Int']>;
+  after?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryUserArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryUserGroupsArgs = {
+  search?: Maybe<Scalars['String']>;
+  limit?: Maybe<Scalars['Int']>;
+  after?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryUserGroupArgs = {
+  id: Scalars['Int'];
+};
+
+export type SignInInput = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+};
+
+export type SignInPayload = {
+  __typename?: 'SignInPayload';
+  accessToken: Scalars['String'];
+};
+
+export type SignUpPayload = {
+  __typename?: 'SignUpPayload';
+  user: User;
+  accessToken: Scalars['String'];
+};
+
+export type SignUpUserInput = {
+  email: Scalars['String'];
+  password: Scalars['String'];
+};
 
 export type User = {
   __typename?: 'User';
@@ -167,17 +178,6 @@ export type UserGroup = {
   createdDate: Scalars['DateTime'];
   modifiedBy: Scalars['String'];
   modifiedDate: Scalars['DateTime'];
-};
-
-export type SignUpPayload = {
-  __typename?: 'SignUpPayload';
-  user: User;
-  accessToken: Scalars['String'];
-};
-
-export type SignInPayload = {
-  __typename?: 'SignInPayload';
-  accessToken: Scalars['String'];
 };
 
 export type UserGroupsPayload = {

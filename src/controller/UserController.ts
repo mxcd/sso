@@ -1,6 +1,10 @@
 import {prisma} from "../util";
+import {sendRegistrationMail} from "../mail-controller";
 const bcrypt = require('bcrypt');
 const SALT_ROUNDS = 10;
+
+const VALIDATE_MAIL = process.env.VALIDATE_MAIL === 'true'
+const LOCKED_BY_DEFAULT = process.env.LOCKED_BY_DEFAULT === 'true'
 
 export async function createUser(email: string, password: string) {
     const existingUser = await prisma.user.findUnique({where: {email}})
@@ -13,14 +17,24 @@ export async function createUser(email: string, password: string) {
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+    let validated = !VALIDATE_MAIL;
+    let locked = LOCKED_BY_DEFAULT;
+
+    // @ts-ignore
     const user = await prisma.user.create({data: {
             email,
             passwordHash,
-            validated: true,
-            locked: false,
+            validated,
+            locked,
             createdBy: 'rp',
             modifiedBy: 'rp',
         }});
+
+    if(VALIDATE_MAIL) {
+        await sendRegistrationMail({user})
+    }
+
     return {
         error: false,
         message: '',
