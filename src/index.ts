@@ -3,7 +3,6 @@ const { ApolloServer } =  require('apollo-server-express');
 // import cors from 'cors';
 // const helmet = require('helmet');
 import compression from 'compression';
-const { Provider } =  require('oidc-provider');
 const providerConfig = require('../provider-config')
 
 const fs = require('fs');
@@ -28,9 +27,15 @@ async function main() {
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'ejs');
 
+    const { Provider, interactionPolicy: { base } } = require('oidc-provider');
+    const basePolicy = base();
+    const consentPrompt = basePolicy.get('consent');
+    consentPrompt.checks.remove('consent_prompt');
+    consentPrompt.checks.remove('op_scopes_missing');
+
     const oidc = new Provider(ISSUER_URL, {
         ...providerConfig,
-        async findAccount(ctx, id) {
+        /*async findAccount(ctx, id) {
             // console.log(`getting account id '${id}'`)
             // console.dir(ctx)
             return {
@@ -42,9 +47,8 @@ async function main() {
                     return { sub: id };
                 },
             };
-        }
+        }*/
     });
-
 
     log.info(`Generating Apollo server`)
     const index = new ApolloServer({
@@ -55,6 +59,7 @@ async function main() {
     log.info(`Applying middlewares`)
     // app.use('*', cors());
     app.use(compression());
+    await index.start();
     index.applyMiddleware({ app, path: '/graphql' });
 
     routes(app, oidc);

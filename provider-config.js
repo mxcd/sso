@@ -3,6 +3,9 @@
 * !! CHANGE KEYS AND SECRETS IN PRODUCTION !!
 */
 
+const clientId = "oidc_test_id"
+const clientSecret = "oidc_test_secret"
+
 const config =  {
     scopes: [
         'openid',
@@ -10,8 +13,8 @@ const config =  {
     ],
     clients: [
         {
-            client_id: "oidc_test_id",
-            client_secret: "oidc_test_secret",
+            client_id: clientId,
+            client_secret: clientSecret,
             redirect_uris: ["https://localhost:8000/secure/redirect_uri"],
             grant_types: [
                 "authorization_code",
@@ -51,40 +54,32 @@ const config =  {
         ],
     },
     loadExistingGrant: async (ctx) => {
-        // https://github.com/panva/node-oidc-provider/blob/main/recipes/skip_consent.md
         const grantId = (ctx.oidc.result
             && ctx.oidc.result.consent
             && ctx.oidc.result.consent.grantId) || ctx.oidc.session.grantIdFor(ctx.oidc.client.clientId);
-
         if (grantId) {
             return ctx.oidc.provider.Grant.find(grantId);
-        } else {
+        } else if (ctx.oidc.client.clientId === clientId) {
             const grant = new ctx.oidc.provider.Grant({
                 clientId: ctx.oidc.client.clientId,
                 accountId: ctx.oidc.session.accountId,
             });
 
-            grant.addOIDCScope('openid email profile offline_access');
-            grant.addOIDCClaims(['first_name refresh_token']);
+            grant.addOIDCScope('openid offline_access');
+            grant.addOIDCClaims(['first_name']);
             grant.addResourceScope('urn:example:resource-indicator', 'api:read api:write');
             await grant.save();
             return grant;
         }
-    },
-    issueRefreshToken: async (ctx, client, code) => {
-        if (!client.grantTypeAllowed('refresh_token')) {
-            return false;
-        }
-        return code.scopes.has('offline_access') || (client.applicationType === 'web' && client.tokenEndpointAuthMethod === 'none');
     },
     ttl: {
         AuthorizationCode: 30 /* 30 seconds */,
         Session: 1209600 /* 14 days in seconds */,
         DeviceCode: 600 /* 10 minutes in seconds */,
         Grant: 1209600 /* 14 days in seconds */,
-        IdToken: 10 /* 1 hour in seconds */,
+        IdToken: 3600 /* 1 hour in seconds */,
         Interaction: 3600 /* 1 hour in seconds */,
-        AccessToken: 10  /* 30 minutes in seconds */,
+        AccessToken: 1800  /* 30 minutes in seconds */,
     }
 }
 module.exports = config;
