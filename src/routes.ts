@@ -1,5 +1,5 @@
 /* eslint-disable no-console, max-len, camelcase, no-unused-vars */
-import {checkUserLogin, createUser} from "./controller/UserController";
+import {checkUserLogin, createUser, USER_VALIDATION_RESULT, validateUser} from "./controller/UserController";
 import {LOGIN_MESSAGE, renderLogin} from "./view-controller/login-controller";
 import {REGISTER_MESSAGE, renderRegister} from "./view-controller/register-controller";
 import {renderConsent} from "./view-controller/consent-controller";
@@ -180,6 +180,42 @@ module.exports = (app, provider) => {
             next(err);
         }
     });
+
+    app.get('/validate', async (req, res) => {
+        const uid = req.query.uid;
+        const code = req.query.code;
+        if(!uid)  {
+            const msg = `validate link called without uid`
+            console.error(msg);
+            res.status(400)
+            res.send(msg)
+            return;
+        }
+        if(!code) {
+            const msg = `validate link called without code`
+            console.error(msg);
+            res.status(400)
+            res.send(msg);
+            return;
+        }
+
+        console.log(`requested validation for user ${uid} with code ${code}`);
+        const result = await validateUser(uid, code);
+        // TODO replace http responses with respective UI renderings
+        // TODO find a way to redirect to original client URL after successful validation
+        if(result === USER_VALIDATION_RESULT.VALIDATED) {
+            res.send(`success`)
+            return;
+        }
+        else if(result === USER_VALIDATION_RESULT.ALREADY_VALID) {
+            res.status(200)
+            res.send(`user already validated`)
+        }
+        else {
+            res.status(400)
+            res.send(`invalid`)
+        }
+    })
 
     app.use((err, req, res, next) => {
         if (err instanceof SessionNotFound) {

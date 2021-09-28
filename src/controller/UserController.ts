@@ -42,6 +42,33 @@ export async function createUser(email: string, password: string) {
     }
 }
 
+export enum USER_VALIDATION_RESULT {
+    INVALID,
+    ALREADY_VALID,
+    VALIDATED
+}
+
+export async function validateUser(uid, code) {
+    const user = await prisma.user.findUnique({where: {id: uid}});
+    if(!user) return false;
+    if(user.validated) {
+        return USER_VALIDATION_RESULT.ALREADY_VALID;
+    }
+    else if(user.validationCode === code) {
+        await prisma.user.update({
+            where: {id: uid},
+            data: {
+                validationCode: '',
+                validated: true
+            }
+        })
+        return USER_VALIDATION_RESULT.VALIDATED;
+    }
+    else {
+        return USER_VALIDATION_RESULT.INVALID;
+    }
+}
+
 export async function checkUserLogin(email, password) {
     const user = await prisma.user.findUnique({where: {email}});
     if(user === null) {
