@@ -1,7 +1,9 @@
+import {initSeedGroups} from "./controller/UserGroupController";
+
 const path = require('path');
 const { ApolloServer } =  require('apollo-server-express');
 // import cors from 'cors';
-// const helmet = require('helmet');
+const helmet = require('helmet');
 import compression from 'compression';
 const providerConfig = require('../provider-config')
 
@@ -18,11 +20,18 @@ let express = require("express");
 const {API_PORT = 3000, ISSUER_URL = "https://localhost:3000"} = env
 
 import schema from './schema/schemas';
+import { initAdminUser } from './controller/UserController';
 
 async function main() {
+    log.info(`Initializing user groups`)
+    await initSeedGroups()
+
+    log.info(`Initializing admin user`)
+    await initAdminUser();
+
     log.info(`Generating express server`)
     const app = express();
-    // app.use(helmet());
+    app.use(helmet());
     // app.set('view engine', 'pug')
     app.set('views', path.join(__dirname, 'views'));
     app.set('view engine', 'ejs');

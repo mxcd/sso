@@ -6,6 +6,9 @@ const SALT_ROUNDS = 10;
 const VALIDATE_MAIL = process.env.VALIDATE_MAIL === 'true'
 const LOCKED_BY_DEFAULT = process.env.LOCKED_BY_DEFAULT === 'true'
 
+const ADMIN_PW = process.env.ADMIN_PW
+const ADMIN_MAIL = process.env.ADMIN_MAIL || ''
+
 export async function createUser(email: string, password: string) {
     const existingUser = await prisma.user.findUnique({where: {email}})
     if(existingUser !== null) {
@@ -77,5 +80,24 @@ export async function checkUserLogin(email, password) {
     else {
         const match = await bcrypt.compare(password, user.passwordHash);
         return {valid: match, user};
+    }
+}
+
+export async function initAdminUser() {
+    const adminUser = await prisma.user.findUnique({where: {email: ADMIN_MAIL}})
+    if(!adminUser) {
+        const passwordHash = await bcrypt.hash(ADMIN_PW, SALT_ROUNDS);
+        // @ts-ignore
+        const user = await prisma.user.create({data: {
+                email: ADMIN_MAIL,
+                passwordHash,
+                validated: true,
+                locked: false,
+                createdBy: 'seed',
+                modifiedBy: 'seed',
+                groups: {
+                    connect: [{name: 'sudo'}]
+                }
+            }});
     }
 }
