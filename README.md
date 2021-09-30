@@ -62,3 +62,23 @@ This will create a certificate and a private key for your local SSL connection a
 ```
 This will build the relying party image based on `httpd` and start it up using the just created certificate  
 The RP will be accessible through [`https://localhost:8000`](https://localhost:8080) unless configured otherwise
+
+
+### Token Introspection
+Token Introspection can be done, by calling the SSO with a valid `client_id` and `client_secret` as `x-www-form-urlencoded`
+parameters alongside with the `token` to be introspected:  
+```shell
+curl --location --request POST 'https://host.docker.internal/token/introspection' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'token=<ACCESS_TOKEN' \
+--data-urlencode 'client_id=<CLIENT_ID>' \
+--data-urlencode 'client_secret=<CLIENT_SECRET>'
+```
+
+### TODOs
+- create UIs for verification email
+- check if user is validated, needs to be validated
+- add GQL API for User and UserGroup
+- figure out token introspection
+- figure out GQL federation with User type
+- build deployment for with redis for statefulness

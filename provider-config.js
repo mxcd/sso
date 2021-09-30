@@ -1,6 +1,7 @@
 /*
 * Example configuration
 * !! CHANGE KEYS AND SECRETS IN PRODUCTION !!
+* !! CHANGE client_id and client_secret IN PRODUCTION !!
 */
 
 const clientId = "oidc_test_id"
@@ -20,6 +21,11 @@ const config =  {
                 "authorization_code",
                 "refresh_token"
             ]
+        },
+        {
+            client_id: 'introspection_client_id',
+            client_secret: 'introspection_client_secret',
+            redirect_uris: ["https://localhost:8000/secure/redirect_uri"],
         }
     ],
     cookies: {
@@ -72,6 +78,18 @@ const config =  {
             return grant;
         }
     },
+    features:{
+        introspection: {
+            allowedPolicy: async (ctx, client, token) => {
+                if (client.introspectionEndpointAuthMethod === 'none' && token.clientId !== ctx.oidc.client.clientId) {
+                    return false;
+                }
+                return true;
+            },
+            enabled: true
+        }
+    },
+    rotateRefreshToken: true,
     ttl: {
         AuthorizationCode: 30 /* 30 seconds */,
         Session: 1209600 /* 14 days in seconds */,
@@ -80,6 +98,7 @@ const config =  {
         IdToken: 3600 /* 1 hour in seconds */,
         Interaction: 3600 /* 1 hour in seconds */,
         AccessToken: 1800  /* 30 minutes in seconds */,
+        RefreshToken: 14 * 24 * 60 * 60, // 14 days in seconds
     }
 }
 module.exports = config;
